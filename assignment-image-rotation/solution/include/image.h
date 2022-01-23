@@ -1,6 +1,6 @@
 #include <inttypes.h>
 #include <stdbool.h>
-
+#include <stdlib.h>
 
 struct pixel {
     uint8_t b;

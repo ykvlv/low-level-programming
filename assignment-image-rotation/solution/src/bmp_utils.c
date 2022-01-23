@@ -1,6 +1,8 @@
 #include "../include/bmp_utils.h"
 
-static uint64_t get_image_padding(uint64_t width) {
+#define BMP_SIGNATURE 0x4D42
+
+static size_t get_image_padding(uint64_t width) {
     return width % 4;
 }
 
@@ -10,6 +12,8 @@ static enum read_status read_header(FILE *file_in, struct bmp_header *header) {
     size_t result = fread(header, sizeof(struct bmp_header), count, file_in);
     if (result != count) {
         return READ_INVALID_HEADER;
+    } else if (header->bfType != BMP_SIGNATURE) {
+        return READ_INVALID_SIGNATURE;
     }
     return READ_OK;
 }
@@ -52,8 +56,8 @@ static struct bmp_header create_header_bmp(struct image const *img) {
 
 static enum write_status write_pixels_bmp(FILE *out, struct image const *img) {
     size_t count = 1;
-    uint32_t padding_val = 0;
-    uint64_t padding = get_image_padding(img->width);
+    size_t padding_val = 0;
+    size_t padding = get_image_padding(img->width);
     for (size_t i = 0; i < img->height; ++i) {
         size_t result_d = fwrite(img->data + i * img->width, img->width * sizeof(struct pixel), count, out);
         size_t result_p = fwrite(&padding_val, padding, count, out);
@@ -69,8 +73,9 @@ enum read_status from_bmp(FILE *input_file, struct image *img) {
         return READ_NOTHING;
     }
     struct bmp_header header = {0};
-    if (read_header(input_file, &header)) {
-        return READ_FAIL;
+    enum read_status read_header_status = read_header(input_file, &header);
+    if (read_header_status != READ_OK) {
+      return read_header_status;
     }
     fseek(input_file, header.bOffBits, SEEK_SET);
     if (make_image(img, header.biWidth, header.biHeight)) {

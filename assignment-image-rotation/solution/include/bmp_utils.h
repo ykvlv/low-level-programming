@@ -28,6 +28,7 @@ enum read_status {
     READ_OK = 0,
     READ_NOTHING,
     READ_FAIL,
+    READ_INVALID_SIGNATURE,
     READ_INVALID_HEADER
 };
 

@@ -1,4 +1,3 @@
-#include <stdlib.h>
 #include "../include/bmp_utils.h"
 #include "../include/transform.h"
 
@@ -12,6 +11,8 @@ bool rotate_bmp(FILE *input_file, FILE *output_file) {
     struct image transformed_image;
 
     if (from_bmp(input_file, &original_image)) {
+        fclose(input_file); fclose(output_file);
+        destroy_image(&original_image);
         error("Не удалось конвертировать файл из BMP.\n");
     }
 
@@ -20,6 +21,8 @@ bool rotate_bmp(FILE *input_file, FILE *output_file) {
     transformed_image = rotate(&original_image);
 
     if(to_bmp(output_file,&transformed_image)) {
+        fclose(input_file); fclose(output_file);
+        destroy_image(&original_image); destroy_image(&transformed_image);
         error("Не удалось конвертировать выходной файл в BMP.\n");
     }
 

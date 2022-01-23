@@ -13,6 +13,7 @@ int main(int argc, char** argv) {
     if (input_file == NULL) {
         error("Ошибка открытии файла\n");
     } else if (output_file == NULL) {
+        fclose(input_file);
         error("Ошибка создании файла\n");
     }
 
