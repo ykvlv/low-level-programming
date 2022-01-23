@@ -117,20 +117,20 @@ struct block_search_result {
 
 static struct block_search_result find_good_or_last  ( struct block_header* restrict block, size_t sz )    {
   struct block_header* cur_block = block;
-  while (!block_is_big_enough(sz, cur_block) || !cur_block->is_free) {
-    while(try_merge_with_next(cur_block));
-
+  while (cur_block != NULL) {
+    if (cur_block->is_free) {
+      while(try_merge_with_next(cur_block));
+      if (block_is_big_enough(sz, cur_block)) {
+        return (struct block_search_result) {BSR_FOUND_GOOD_BLOCK, cur_block};
+      }
+    }
     if (cur_block->next != NULL) {
       cur_block = cur_block->next;
     } else {
       break;
     }
   }
-  if (block_is_big_enough(sz, cur_block) && cur_block->is_free == true) {
-    return (struct block_search_result) {BSR_FOUND_GOOD_BLOCK, cur_block};
-  } else {
-    return (struct block_search_result) {BSR_REACHED_END_NOT_FOUND, cur_block};
-  }
+  return (struct block_search_result) {BSR_REACHED_END_NOT_FOUND, cur_block};
 }
 
 /*  Попробовать выделить память в куче начиная с блока `block` не пытаясь расширить кучу
@@ -146,10 +146,10 @@ static struct block_search_result try_memalloc_existing ( size_t query, struct b
 
 
 static struct block_header* grow_heap( struct block_header* restrict last, size_t query ) {
-  block_size size = size_from_capacity(last->capacity);
-  struct region new_region = alloc_region(last->contents + size.bytes, query);
+  void* reg_addr = (void*) (last->contents + last->capacity.bytes);
+  struct region new_region = alloc_region(reg_addr, query);
 
-  block_init(new_region.addr, (block_size) {new_region.size}, NULL);
+  if(region_is_invalid(&new_region)) return NULL;
   last->next = (struct block_header*) new_region.addr;
 
   if (try_merge_with_next(last)) return last;
@@ -164,6 +164,8 @@ static struct block_header* memalloc( size_t query, struct block_header* heap_st
     case BSR_REACHED_END_NOT_FOUND:
       bsr.block = grow_heap(bsr.block, query);
       split_if_too_big(bsr.block, query);
+      bsr.block->is_free = false;
+      return bsr.block;
     case BSR_FOUND_GOOD_BLOCK:
       bsr.block->is_free = false;
       return bsr.block;

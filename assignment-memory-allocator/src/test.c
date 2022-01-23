@@ -65,8 +65,8 @@ void test2(struct block_header* first_block) {
     err("Тест провален: блок не был освобожден.");
 
   debug("Тест 2 прошел успешно.\n\n");
-  _free(data1);
   _free(data2);
+  _free(data1);
 }
 
 void test3(struct block_header* first_block) {
@@ -93,9 +93,9 @@ void test3(struct block_header* first_block) {
     err("Тест провален.");
 
   debug("Тест 3 прошел успешно.\n\n");
-  _free(data1);
-  _free(data2);
   _free(data3);
+  _free(data2);
+  _free(data1);
 }
 
 void test4(struct block_header* first_block) {
@@ -118,9 +118,9 @@ void test4(struct block_header* first_block) {
     err("Тест провален.");
 
   debug("Тест 4 прошел успешно.\n\n");
-  _free(data1);
-  _free(data2);
   _free(data3);
+  _free(data2);
+  _free(data1);
 }
 
 void test5(struct block_header* first_block) {
@@ -141,8 +141,8 @@ void test5(struct block_header* first_block) {
     err("Тест 5 провален.");
 
   debug("Тест 5 прошел успешно.\n\n");
-  _free(data1);
   _free(data2);
+  _free(data1);
 }
 
 void test_allocator() {
